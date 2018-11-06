@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+
+
+
+</head>
+
+<body>
+
+
+        <h1>Incident</h1>
+        <table border = 1px cellpadding="3" style="font-family:Arial">
+        <tr>
+        <th>Incident number</th>
+        <th>Offense description</th>
+        <th>Shooting?</th>
+        <th>Offense code group</th>
+        <th>Offense code</th>
+            <th>District ID </th>
+        </tr>
+        {% for Incident in Incident %}
+        <tr>
+        <td>{{Incident.incident_num}}</td>
+        <td>{{Incident.offense_description}}</td>
+        <td>{{Incident.shooting}}</td>
+        <td>{{Incident.offense_code_group}}</td>
+        <td>{{Incident.offense_code}}</td>
+        <td>{{Incident.did}}</td>
+        </tr>
+        {% endfor %}
+        </table>
+
+
+
+
+
+</body>
+</html>
