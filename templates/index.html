@@ -11,6 +11,8 @@
         <h1>Incident</h1>
         <table border = 1px cellpadding="3" style="font-family:Arial">
         <tr>
+{#            <th>Incident number</th>#}
+{#        <th>Offense description</th>#}
         <th>Incident number</th>
         <th>Offense description</th>
         <th>Shooting?</th>
@@ -20,6 +22,8 @@
         </tr>
         {% for Incident in Incident %}
         <tr>
+{#        <td>{{Incident}}</td>#}
+{#        <td>{{Incident.longtitude}}</td>#}
         <td>{{Incident.incident_num}}</td>
         <td>{{Incident.offense_description}}</td>
         <td>{{Incident.shooting}}</td>
