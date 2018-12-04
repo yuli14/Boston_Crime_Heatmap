@@ -156,7 +156,7 @@ class IncidentLocation(models.Model):
 
 class IncidentTime(models.Model):
     incident_num = models.ForeignKey(Incident, models.DO_NOTHING, db_column='incident_num', primary_key=True,related_name='time_incident_number')
-    offense_code = models.ForeignKey(Incident, models.DO_NOTHING, db_column='offense_code')
+    offense_code = models.ForeignKey(Incident, models.DO_NOTHING, db_column='offense_code',related_name='time_offense_code')
     datetime = models.DateTimeField(blank=True, null=True)
     dayofweek = models.CharField(max_length=10, blank=True, null=True)
 

@@ -3,7 +3,7 @@ from django.template.response import TemplateResponse
 from django.template import Context, loader
 from django.http import HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
-from BC.models import Incident,IncidentLocation,PsLocation
+from BC.models import Incident,IncidentLocation,PsLocation,IncidentTime
 from decimal import Decimal
 from django.db import connection
 import json
@@ -20,15 +20,16 @@ import json
 def map(request):
     # longtitude_list = IncidentLocation.longtitude
     # latlong_list = IncidentLocation.objects.all()[0:9].values_list('latitude','longtitude')
-    latlong_list = IncidentLocation.objects.all()
+    latlong_list = IncidentLocation.objects.values('latitude','longtitude','district')
     police_list = PsLocation.objects.all()
+    IncidentTime_list = IncidentTime.objects.values('datetime','dayofweek','offense_code')
 
     # police_list = PsLocation.objects.all()[0:9].values_list('latitude','longtitude')
     # latlong_list_json = json.dumps(list(latlong_list),cls=DjangoJSONEncoder)
     # latlong_list =serializers.serialize("json",IncidentLocation.objects.all())
     tmpl = loader.get_template("map.html")
     print(type(latlong_list))
-    cont1 = {'location': latlong_list,'ps_location':police_list}
+    cont1 = {'location': latlong_list,'ps_location':police_list,'IncidentTime':IncidentTime_list}
     print(type(police_list))
 
 

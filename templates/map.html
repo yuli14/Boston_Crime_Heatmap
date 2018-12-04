@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.9/d3.min.js"></script>
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
 {#    <script type="text/javascript" src="{%static "Police_Districts.geojson"%}"></script>#}
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
     <style>
       #map {
         width: 1000px;
@@ -40,16 +40,71 @@ float: left;
 margin-right: 8px;
 opacity: 0.7;
 }
+      #add_new_data{
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    width: 400px;
+    height: 150px;
+
+}
+
+        #add_forms {
+    position: absolute;
+    top: 210px;
+    right: 10px;
+    width: 400px;
+    height: 150px;
+
+}
+
+        #types_forms {
+    position: absolute;
+    top: 430px;
+    right: 10px;
+    width: 400px;
+    height: 150px;
+
+}
+        select {
+    width: 40%;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+}
+        table{
+            border: 1px;
+        }
 </style>
 
 
 </head>
 
 <body>
-<div id="map" ></div>
+
+<div id="add_new_data" >this is reserved for adding new element
+
+</div>
+
+
+<div id="add_forms" >
+<canvas id="myChart1"></canvas>
+</div>
+
+<div id="types_forms" >
+   <canvas id="myChart2"></canvas>
+
+
+
+</div>
+<div id="map" >
+
+
 </div>
 
 <script>
+
 function getColor(d) {
     return d > 4500 ? '#800026' :
            d > 3800  ? '#BD0026' :
@@ -89,6 +144,7 @@ function function_style(feature) {
 var map = L.map('map',{
     preferCanvas: true
 }).setView([ 42.329268, -71.070950], 12);
+map.doubleClickZoom.disable();
 //add title(base)layer
 {#function onMapClick(e) {#}
 {#    alert("You clicked the map at " + e.latlng);#}
@@ -125,16 +181,29 @@ var crime_location=[
     {%endfor%}
     ];
 
+var crime_time=[
+    {%for ctime in IncidentTime%}
+        {%if not forloop.first%},
+        {%endif%}
+            {
+            datetime:"{{ctime.datetime}}",
+            dayofweek:"{{ctime.dayofweek}}",
+            offense_code:"{{ ctime.offense_code }}"
+
+            }
+    {%endfor%}
+    ];
+
+
 var ps_locations=[
     {%for ps_locate in ps_location%}
         {%if not forloop.first%},
         {%endif%}
             {
-                pid:"{{ ps_locate.pid }}",
+            pid:"{{ ps_locate.pid }}",
             latitude:"{{ps_locate.latitude}}",
             longtitude:"{{ps_locate.longtitude}}",
                 street:"{{ ps_locate.street }}",
-                city:"{{ ps_locate.city }}",
                 zipcode:"{{ ps_locate.zipcode }}"
             }
     {%endfor%}
@@ -150,6 +219,43 @@ const grouped = crime_location.reduce((groups, cur) => {
 
 const result = Object.keys(grouped).map(key => ({district: key.trim(), count: grouped[key]}));
 
+
+const grouped_dayofweek = crime_time.reduce((groups, cur) => {
+    const key = cur.dayofweek;
+    if (key.trim()!=""){
+    groups[key] = (groups[key] || 0) + 1;
+    }
+
+
+    return groups;
+}, {});
+
+const result_day = Object.keys(grouped_dayofweek).map(key => ({dayofweek: key.trim(), count: grouped_dayofweek[key]})).sort((a, b) => a.count - b.count );
+{#console.log(result_day);#}
+function getMonthfromKey(key){
+var arr = key.split(",")[0].substring(0,3);
+{#console.log(arr);#}
+return arr
+
+
+}
+
+const grouped_month = crime_time.reduce((groups, cur) => {
+
+    {#console.log(cur.datetime);#}
+    const key = getMonthfromKey(cur.datetime);
+    if(!key.includes("Non")){
+    groups[key] = (groups[key] || 0) + 1;
+    }
+
+
+    return groups;
+}, {});
+
+const result_month = Object.keys(grouped_month).map(key => ({datetime: key.trim(), count: grouped_month[key]})).sort((a, b) => a.count - b.count );
+{#console.log(result_month);#}
+{##}
+{#console.log(result_day);#}
 //place circle markers of crime on layer, if you want see result, uncomment below
 {#for(var i=0;i<crime_location.length;i++) {#}
 {##}
@@ -158,7 +264,68 @@ const result = Object.keys(grouped).map(key => ({district: key.trim(), count: gr
 {#        marker = new L.circleMarker([crime_location[i].latitude, crime_location[i].longtitude]).addTo(map);#}
         {#console.log(crime_location[i].district)#}
 {#    }#}
-//{#}#}
+
+{#console.log(result_month);#}
+{#var month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];#}
+{#var month_crime_rate = [];#}
+{##}
+{#for (var i=0;i<month.length;i++){#}
+{#    if (month[i]==result_month.datetime){#}
+{#        month_crime_rate.push()#}
+{#    }#}
+
+{#    console.log(Object.values(Object.values(result_month).count));#}
+{#console.log(result_month.keys());#}
+
+var month_name=[];
+var month_rate=[];
+var dayofweek_name=[];
+var dayofweek_rate=[];
+
+for (var ii=0;ii<result_month.length;ii++){
+    month_name.push(result_month[ii].datetime);
+    month_rate.push(result_month[ii].count)
+}
+for (var jj=0;jj<result_day.length;jj++){
+    dayofweek_name.push(result_day[jj].dayofweek);
+    dayofweek_rate.push(result_day[jj].count)
+}
+
+
+var ctx1 = document.getElementById("myChart1");
+var myChart1 = new Chart(ctx1, {
+  type: 'line',
+  data: {
+    labels: month_name,
+    datasets: [
+      {
+        data: month_rate,
+          label:"crime rate of each month",
+          borderColor:"#f16de5"
+
+      }
+    ]
+  }
+});
+
+var ctx2 = document.getElementById("myChart2");
+var myChart2 = new Chart(ctx2, {
+  type: 'line',
+  data: {
+    labels:dayofweek_name,
+    datasets: [
+      {
+        data: dayofweek_rate,
+          label:"crime rate of each days",
+          borderColor:"#f16de5"
+
+      }
+    ]
+  }
+});
+
+{#document.getElementById('query_time_forms').appendChild(table1);#}
+{#document.getElementById('query_time_forms').appendChild(table2);#}
 
 //place markers on police station on layer
 for(var i=0;i<ps_locations.length;i++) {
@@ -184,7 +351,7 @@ $.getJSON("{%static "Police_Districts.json"%}", function (json) {
 
         onEachFeature: function (feature, layer) {
 
-            console.log(feature);
+            {#console.log(feature);#}
             var count = 0;
             for (var i=0;i<result.length;i++){
                 if (result[i].district===feature.properties.DISTRICT){
@@ -197,7 +364,7 @@ $.getJSON("{%static "Police_Districts.json"%}", function (json) {
             var popupContent =
             "<p><b>District: </b>"+ feature.properties.DISTRICT +
             "</br>ID: "+ feature.properties.OBJECTID +
-                "</br>count: "+ count+'</p>';
+                "</br>crime count: "+ count+'</p>';
                 {#"</br>city name:"+feature.properties.city+'</p>';#}
             layer.on('click',function(e){
                 layer.bindPopup(popupContent);
@@ -206,11 +373,11 @@ $.getJSON("{%static "Police_Districts.json"%}", function (json) {
             layer.on('mouseover', function (e) {
 
                 this.setStyle({
-                    color: '#51cc1a',
+                    color: '#D6EAF8',
                     weight: 3,
                     opacity: 0.6,
                     fillOpacity: 0.65,
-                    fillColor: '#cc0810'
+                    fillColor: '#2980B9'
                 });
             });
             layer.on('mouseout', function (e) {
