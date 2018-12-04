@@ -8,7 +8,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.9/d3.min.js"></script>
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
-{#    <script type="text/javascript" src="{%static "Police_Districts.geojson"%}"></script>#}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
     <style>
       #map {
@@ -49,21 +48,21 @@ opacity: 0.7;
 
 }
 
-        #add_forms {
+        #chart_div1 {
     position: absolute;
-    top: 210px;
+    top: 50px;
     right: 10px;
     width: 400px;
-    height: 150px;
+    height: 250px;
 
 }
 
-        #types_forms {
+        #chart_div2 {
     position: absolute;
-    top: 430px;
+    top: 400px;
     right: 10px;
     width: 400px;
-    height: 150px;
+    height: 250px;
 
 }
         select {
@@ -83,28 +82,23 @@ opacity: 0.7;
 
 <body>
 
-<div id="add_new_data" >this is reserved for adding new element
+<!-- chart division 1-->
+    <div id="chart_div1" >
+        <canvas id="myChart1"></canvas>
+    </div>
 
-</div>
+<!-- chart division 2-->
+    <div id="chart_div2" >
+        <canvas id="myChart2"></canvas>
 
+    </div>
 
-<div id="add_forms" >
-<canvas id="myChart1"></canvas>
-</div>
-
-<div id="types_forms" >
-   <canvas id="myChart2"></canvas>
-
-
-
-</div>
-<div id="map" >
-
-
-</div>
+<!--map division-->
+    <div id="map" >
+    </div>
 
 <script>
-
+{#get color for the legend bar at the bottom right#}
 function getColor(d) {
     return d > 4500 ? '#800026' :
            d > 3800  ? '#BD0026' :
@@ -116,7 +110,7 @@ function getColor(d) {
                       '#FFEDA0';
 }
 
-
+{#style function of the legend bar#}
 function function_style(feature) {
     return{
     fillColor: getColor(feature),
@@ -126,48 +120,27 @@ function function_style(feature) {
         dashArray: '3',
         fillOpacity: 0.7
 
-
-
 };}
-    var highlight = {
-        'fillColor': 'yellow',
-        'weight': 2,
-        'opacity': 1
-    };
+{#set the icon of police station#}
+var ps_Icon = L.icon({
+    iconUrl: "{%static "Police_Station.svg"%}",
+    iconSize:     [38, 95], // size of the icon
 
-// Action for each feature of the choropleth
+});
 
-
-
-
-//start map
+{#start map#}
 var map = L.map('map',{
     preferCanvas: true
 }).setView([ 42.329268, -71.070950], 12);
 map.doubleClickZoom.disable();
-//add title(base)layer
-{#function onMapClick(e) {#}
-{#    alert("You clicked the map at " + e.latlng);#}
-{#map.on('click', onMapClick);#}
-var ps_Icon = L.icon({
-    iconUrl: "{%static "Police_Station.svg"%}",
 
-
-    iconSize:     [38, 95], // size of the icon
-    // point from which the popup should open relative to the iconAnchor
-});
-
-
-
+{#the initial layer of the map#}
 var osm=new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
              maxZoom:100,
             minZoom:0.5}).addTo(map);
 
-
-
-
-//read crime location and police station from django view, from daatbase
+{#read crime location and police station from django view, from database#}
 var crime_location=[
     {%for locate in location%}
         {%if not forloop.first%},
@@ -208,12 +181,10 @@ var ps_locations=[
             }
     {%endfor%}
     ];
-//get the count of crime according to district using map reduce
+{#get the count of crime according to district using map reduce#}
 const grouped = crime_location.reduce((groups, cur) => {
     const key = cur.district;
-
     groups[key] = (groups[key] || 0) + 1;
-
     return groups;
 }, {});
 
@@ -225,16 +196,14 @@ const grouped_dayofweek = crime_time.reduce((groups, cur) => {
     if (key.trim()!=""){
     groups[key] = (groups[key] || 0) + 1;
     }
-
-
     return groups;
 }, {});
 
 const result_day = Object.keys(grouped_dayofweek).map(key => ({dayofweek: key.trim(), count: grouped_dayofweek[key]})).sort((a, b) => a.count - b.count );
-{#console.log(result_day);#}
+
+{#parse the char of month function#}
 function getMonthfromKey(key){
 var arr = key.split(",")[0].substring(0,3);
-{#console.log(arr);#}
 return arr
 
 
@@ -242,21 +211,17 @@ return arr
 
 const grouped_month = crime_time.reduce((groups, cur) => {
 
-    {#console.log(cur.datetime);#}
     const key = getMonthfromKey(cur.datetime);
-    if(!key.includes("Non")){
+    if(!key.includes("Non")){ //do not need to count the Non month
     groups[key] = (groups[key] || 0) + 1;
     }
-
-
     return groups;
 }, {});
 
 const result_month = Object.keys(grouped_month).map(key => ({datetime: key.trim(), count: grouped_month[key]})).sort((a, b) => a.count - b.count );
-{#console.log(result_month);#}
-{##}
-{#console.log(result_day);#}
-//place circle markers of crime on layer, if you want see result, uncomment below
+
+
+{#place circle markers of crime on layer, if you want see result, uncomment below#}
 {#for(var i=0;i<crime_location.length;i++) {#}
 {##}
 {#    if (crime_location[i].latitude != "None" && crime_location[i].longtitude != "None") {#}
@@ -265,18 +230,7 @@ const result_month = Object.keys(grouped_month).map(key => ({datetime: key.trim(
         {#console.log(crime_location[i].district)#}
 {#    }#}
 
-{#console.log(result_month);#}
-{#var month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];#}
-{#var month_crime_rate = [];#}
-{##}
-{#for (var i=0;i<month.length;i++){#}
-{#    if (month[i]==result_month.datetime){#}
-{#        month_crime_rate.push()#}
-{#    }#}
-
-{#    console.log(Object.values(Object.values(result_month).count));#}
-{#console.log(result_month.keys());#}
-
+{#month and monthly crime rate& day of week and day of week crime rate#}
 var month_name=[];
 var month_rate=[];
 var dayofweek_name=[];
@@ -291,7 +245,7 @@ for (var jj=0;jj<result_day.length;jj++){
     dayofweek_rate.push(result_day[jj].count)
 }
 
-
+{#draw the two charts#}
 var ctx1 = document.getElementById("myChart1");
 var myChart1 = new Chart(ctx1, {
   type: 'line',
@@ -324,18 +278,14 @@ var myChart2 = new Chart(ctx2, {
   }
 });
 
-{#document.getElementById('query_time_forms').appendChild(table1);#}
-{#document.getElementById('query_time_forms').appendChild(table2);#}
 
-//place markers on police station on layer
+{#place markers on police station on layer#}
 for(var i=0;i<ps_locations.length;i++) {
 
     if (ps_locations[i].latitude != "None" && ps_locations[i].longtitude != "None") {
-        {#console.log(ps_locations[i].latitude,ps_locations[i].longtitude);#}
-        var popupContent ="<p><b>department id: </b>"+ ps_locations[i].pid +
+    var popupContent ="<p><b>department id: </b>"+ ps_locations[i].pid +
             "</br>zipcode: "+ ps_locations[i].zipcode +
             "</br>street: "+ ps_locations[i].street +'</p>';
-        {#console.log(popupContent);#}
         marker1 = new L.Marker([ps_locations[i].longtitude, ps_locations[i].latitude],{icon:ps_Icon});
         marker1['pop'] = popupContent;
 
@@ -345,27 +295,23 @@ for(var i=0;i<ps_locations.length;i++) {
 
     }
 }
+{#get the police_station from static json file#}
 $.getJSON("{%static "Police_Districts.json"%}", function (json) {
     var geojson = L.geoJson(json, {
-
-
         onEachFeature: function (feature, layer) {
 
-            {#console.log(feature);#}
             var count = 0;
             for (var i=0;i<result.length;i++){
                 if (result[i].district===feature.properties.DISTRICT){
                     count = result[i].count;
                 }
             }
-
             layer.setStyle(function_style(count));
 
             var popupContent =
             "<p><b>District: </b>"+ feature.properties.DISTRICT +
             "</br>ID: "+ feature.properties.OBJECTID +
                 "</br>crime count: "+ count+'</p>';
-                {#"</br>city name:"+feature.properties.city+'</p>';#}
             layer.on('click',function(e){
                 layer.bindPopup(popupContent);
 
@@ -388,12 +334,7 @@ $.getJSON("{%static "Police_Districts.json"%}", function (json) {
     }).addTo(map);
 });
 
-var baseMaps = {
-    "Open Street Map": osm
-};
-
-//Add layer control
-{#var legend = L.control({position: 'bottomright'});#}
+{#add bar legend#}
 
 var legend = L.control({position: 'bottomright'});
 
@@ -412,8 +353,10 @@ legend.onAdd = function (map) {
 
     return div;
 };
-
-
+//Add layer control
+var baseMaps = {
+    "Open Street Map": osm
+};
 legend.addTo(map);
 L.control.layers(baseMaps).addTo(map);
 legend.addTo(map);
