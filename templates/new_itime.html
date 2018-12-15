@@ -1,0 +1,13 @@
+{% extends 'index.html' %}
+
+{% block content %}
+        <h2>New Incident Time</h2>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {{ itform.as_p }}
+                <p>Time Format: 2006-10-25 14:30:59</p>
+                <button type="submit" class="save btn btn-default">Next</button>
+            </form>
+        </div>
+
+{% endblock %}
