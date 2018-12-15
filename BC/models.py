@@ -18,6 +18,7 @@ class AuthGroupPermissions(models.Model):
     group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
     permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
 
+
     class Meta:
         managed = False
         db_table = 'auth_group_permissions'
@@ -125,6 +126,18 @@ class DjangoSession(models.Model):
         managed = False
         db_table = 'django_session'
 
+class OffenseCode(models.Model):
+    code = models.BigIntegerField(primary_key=True)
+    code_description = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.code)
+
+    class Meta:
+        managed = False
+        db_table = 'offense_code'
+
+
 
 class Incident(models.Model):
     incident_num = models.CharField(primary_key=True, max_length=10)
@@ -132,6 +145,9 @@ class Incident(models.Model):
     shooting = models.CharField(max_length=40, blank=True, null=True)
     offense_code_group = models.CharField(max_length=40, blank=True, null=True)
     offense_code = models.ForeignKey('OffenseCode', models.DO_NOTHING, db_column='offense_code')
+
+    def __str__(self):
+        return self.incident_num
 
     class Meta:
         managed = False
@@ -141,7 +157,7 @@ class Incident(models.Model):
 
 class IncidentLocation(models.Model):
     incident_num = models.ForeignKey(Incident, models.DO_NOTHING, db_column='incident_num', primary_key=True,related_name='location_incident_number')
-    offense_code = models.ForeignKey(Incident, models.DO_NOTHING, db_column='offense_code',related_name='location_offense_code')
+    offense_code = models.ForeignKey(OffenseCode, models.DO_NOTHING, db_column='offense_code',related_name='location_offense_code')
     street = models.CharField(max_length=40, blank=True, null=True)
     reporting_area = models.CharField(max_length=5, blank=True, null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=7, blank=True, null=True)
@@ -156,7 +172,7 @@ class IncidentLocation(models.Model):
 
 class IncidentTime(models.Model):
     incident_num = models.ForeignKey(Incident, models.DO_NOTHING, db_column='incident_num', primary_key=True,related_name='time_incident_number')
-    offense_code = models.ForeignKey(Incident, models.DO_NOTHING, db_column='offense_code',related_name='time_offense_code')
+    offense_code = models.ForeignKey(OffenseCode, models.DO_NOTHING, db_column='offense_code',related_name='time_offense_code')
     datetime = models.DateTimeField(blank=True, null=True)
     dayofweek = models.CharField(max_length=10, blank=True, null=True)
 
@@ -166,13 +182,6 @@ class IncidentTime(models.Model):
         unique_together = (('incident_num', 'offense_code'),)
 
 
-class OffenseCode(models.Model):
-    code = models.BigIntegerField(primary_key=True)
-    code_description = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'offense_code'
 
 
 class PoliceStation(models.Model):

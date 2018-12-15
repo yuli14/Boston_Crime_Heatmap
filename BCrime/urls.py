@@ -19,16 +19,25 @@ from django.contrib import admin
 from django.urls import path
 from BC import views
 from django.conf.urls import url
-from BC.views import map
+from BC.views import index, map, new_incident, new_ilocation, new_itime
 from django.conf.urls import url, include
 
 urlpatterns = [
-    # url(r'^templates/',include('')),
+
     path('admin/', admin.site.urls),
-    # url(r'^$', index, name='index'),
-    url(r'^$', map),
-    #     # url(r'^BCrime/', include('BC.', namespace='Articles')),
-    # #
+    url(r'^$', index, name='index'),
+
+    url(r'^map', map),
+    path('map', views.map, name='map'),
+
+    url(r'^new_incident$', new_incident),
+    path('new_incident', views.new_incident, name='new_incident'),
+
+    path('new_itime', views.new_itime, name='new_itime'),
+    url(r'^new_itime$', new_itime),
+
+    path('new_ilocation', views.new_ilocation, name='new_ilocation'),
+    url(r'^new_ilocation', new_ilocation),
 ]
 
-"""url(r'^$', views.home),"""
+

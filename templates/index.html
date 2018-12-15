@@ -1,42 +1,44 @@
-<!DOCTYPE html>
-<head>
+<html>
+    <head>
+        <title>Boston Crime Report</title>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    </head>
 
 
 
-</head>
+    <body>
 
-<body>
+        <div class="page-header">
 
+            <a href="{% url 'new_incident' %}" class="top-menu"><span class="glyphicon glyphicon-plus"> Add New Crime</span></a>
+            <a href="{% url 'map' %}" class="top-menu"><span class="glyphicon glyphicon-map-marker"> Display B-Town Heat Map</span></a>
+            <h1><a href="/">Boston Crime Report</a></h1>
 
-        <h1>Incident</h1>
-        <table border = 1px cellpadding="3" style="font-family:Arial">
-        <tr>
-{#            <th>Incident number</th>#}
-{#        <th>Offense description</th>#}
-        <th>Incident number</th>
-        <th>Offense description</th>
-        <th>Shooting?</th>
-        <th>Offense code group</th>
-        <th>Offense code</th>
-            <th>District ID </th>
-        </tr>
-        {% for Incident in Incident %}
-        <tr>
-{#        <td>{{Incident}}</td>#}
-{#        <td>{{Incident.longtitude}}</td>#}
-        <td>{{Incident.incident_num}}</td>
-        <td>{{Incident.offense_description}}</td>
-        <td>{{Incident.shooting}}</td>
-        <td>{{Incident.offense_code_group}}</td>
-        <td>{{Incident.offense_code}}</td>
-        <td>{{Incident.did}}</td>
-        </tr>
-        {% endfor %}
-        </table>
+        </div>
 
+        <div class="content container">
+            <div class="row">
+                <div class="col-lg-12">
+                {% block content %}
+                {% endblock %}
+                </div>
+            </div>
+        </div>
 
+                {% block css %}
+                {% endblock %}
 
-
-
-</body>
+                {% block scripts %}
+                {% endblock %}
+    </body>
 </html>
